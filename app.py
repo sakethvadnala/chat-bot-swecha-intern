@@ -1,59 +1,61 @@
 import streamlit as st
 import requests
+import os
+from dotenv import load_dotenv
 
-st.set_page_config(page_title="Doc Bot", page_icon="🤖", layout="centered")
+# Load environment variables
+load_dotenv()
+API_KEY = os.getenv("API_KEY")
 
-st.title("🤖 Doc Bot - Your Health Assistant")
-st.write("Ask me anything about your symptoms and I’ll give you doctor-style suggestions.")
+# Dify API Endpoint (adjust if needed)
+API_URL = "https://api.dify.ai/v1/chat-messages"
 
-# Your Dify API key and URL
-API_KEY = "Authorization: Bearer {API_KEY}"  # <-- Replace with your Dify App API Key
-API_URL = "https://api.dify.ai/v1"
+# Streamlit UI
+st.set_page_config(page_title="Dify AI Chatbot", page_icon="🤖", layout="centered")
+st.title("🤖 Dify AI Chatbot")
 
-# Store chat history
+# Chat history
 if "messages" not in st.session_state:
-    st.session_state.messages = []
+    st.session_state["messages"] = []
 
-# Display chat history
-for msg in st.session_state.messages:
-    if msg["role"] == "user":
-        st.markdown(f"**You:** {msg['content']}")
-    else:
-        st.markdown(f"**Doc Bot:** {msg['content']}")
+# Display previous messages
+for msg in st.session_state["messages"]:
+    with st.chat_message(msg["role"]):
+        st.markdown(msg["content"])
 
-# Input field
-user_input = st.text_input("💬 Ask Doc Bot anything:", key="input")
+# User input
+user_input = st.chat_input("Type your message...")
 
-if st.button("Send") and user_input:
-    # Add user message
-    st.session_state.messages.append({"role": "user", "content": user_input})
-    st.markdown(f"**You:** {user_input}")
+if user_input:
+    # Show user message
+    st.chat_message("user").markdown(user_input)
+    st.session_state["messages"].append({"role": "user", "content": user_input})
+
+    # Prepare request
+    headers = {
+        "Authorization": API_KEY,
+        "Content-Type": "application/json"
+    }
+
+    payload = {
+        "inputs": {},
+        "query": user_input,
+        "response_mode": "blocking",
+        "conversation_id": "",
+        "user": "user1"
+    }
 
     try:
-        payload = {
-            "inputs": {},
-            "query": user_input,
-            "response_mode": "blocking",
-            "conversation_id": "",
-            "user": "streamlit-user"
-        }
-
-        headers = {
-            "Authorization": f"Bearer {API_KEY}",
-            "Content-Type": "application/json"
-        }
-
+        # Send request to Dify API
         response = requests.post(API_URL, json=payload, headers=headers)
-        
-        if response.status_code == 200:
-            bot_reply = response.json().get("answer", "")
-        else:
-            bot_reply = f"⚠️ Error {response.status_code}: {response.text}"
+        response.raise_for_status()
 
-    except Exception as e:
-        bot_reply = f"⚠️ Could not connect to Dify: {str(e)}"
+        # Extract bot reply
+        bot_reply = response.json().get("answer", "⚠️ No reply from API")
+        st.chat_message("assistant").markdown(bot_reply)
 
-    # Add bot reply
-    st.session_state.messages.append({"role": "assistant", "content": bot_reply})
-    st.markdown(f"**Doc Bot:** {bot_reply}")
+        # Save bot reply to session
+        st.session_state["messages"].append({"role": "assistant", "content": bot_reply})
 
+    except requests.exceptions.RequestException as e:
+        st.error(f"❌ API Error: {e}")
