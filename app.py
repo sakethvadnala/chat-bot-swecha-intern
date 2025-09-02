@@ -5,7 +5,7 @@ import requests
 # SETTINGS
 # Replace with your actual API key from Dify
 API_KEY = "app-NCP7hdzl43aab5JPGYz5UmLy"
-API_URL = "https://api.dify.ai/v1"
+API_URL = "https://api.dify.ai/v1/chat-messages"
 # -------------------------------
 
 st.title("🩺 Doc Bot - AI Doctor Assistant")
@@ -39,3 +39,4 @@ if st.button("Ask Doc Bot"):
                 st.error(f"Error {response.status_code}: {response.text}")
         except Exception as e:
             st.error(f"Request failed: {e}")
+
