@@ -17,9 +17,10 @@ if st.button("Ask Doc Bot"):
         st.warning("Please enter a question.")
     else:
         headers = {
-            "Authorization": API_KEY,
-            "Content-Type": "application/json"
-        }
+    "Authorization": f"Bearer {API_KEY}",  # ✅ correct format
+    "Content-Type": "application/json"
+}
+
         payload = {
             "inputs": {},
             "query": user_input,
@@ -36,3 +37,4 @@ if st.button("Ask Doc Bot"):
                 st.error(f"Error {response.status_code}: {response.text}")
         except Exception as e:
             st.error(f"Request failed: {e}")
+
