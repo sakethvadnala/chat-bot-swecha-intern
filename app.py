@@ -1,11 +1,10 @@
 import streamlit as st
 import requests
 import os
-from dotenv import load_dotenv
+import streamlit as st
 
-load_dotenv()  # Load variables from .env
+API_KEY = st.secrets["API_KEY"]
 
-API_KEY = os.getenv("API_KEY")
 API_URL = "https://api.dify.ai/v1/chat-messages"
 
 st.title("🩺 Doc Bot - AI Doctor Assistant")
