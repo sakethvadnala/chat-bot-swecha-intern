@@ -10,17 +10,6 @@ API_URL = "https://api.dify.ai/v1/chat-messages"
 st.title("🩺 Doc Bot - AI Doctor Assistant")
 
 user_input = st.text_input("Describe your symptoms or ask a medical question:")
-from langdetect import detect
-
-user_input = st.text_input("Describe your symptoms or ask a medical question:")
-
-if user_input.strip():
-    try:
-        lang = detect(user_input)
-    except:
-        lang = "unknown"
-
-    st.write(f"📝 Detected language: {lang}")
 
 if st.button("Ask Doc Bot"):
     if not user_input.strip():
@@ -47,5 +36,6 @@ if st.button("Ask Doc Bot"):
                 st.error(f"Error {response.status_code}: {response.text}")
         except Exception as e:
             st.error(f"Request failed: {e}")
+
 
 
